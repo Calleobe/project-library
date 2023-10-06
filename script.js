@@ -272,7 +272,20 @@ function renderRecipes(recipeList) {
 
     //Adding the cooking time
     const recipeTime = document.createElement("p");
-    recipeTime.textContent = recipe.totalTime;
+    function timeConvert(n) {
+      const rhours = Math.floor(n / 60);
+      const rminutes = n % 60;
+      if (rhours < 1) {
+        return `${rminutes} minutes.`;
+      } else if (rminutes != 0) {
+        return `${rhours} hours and ${rminutes} minutes.`;
+      } else {
+        return `${rhours} hours`;
+      }
+    }
+
+    recipeTime.textContent = timeConvert(recipe.totalTime);
+
     if (recipe.totalTime != null) {
       //if there is no value here we dont add either heading or cooking time
       recipeBox.appendChild(recipeTimeHeader);
@@ -346,16 +359,57 @@ sortByTimeButtons.forEach((button) => {
     switch (button.value) {
       case "longest":
         sortedRecipes = [...currentDisplayedRecipes].sort(
-          (a, b) => b.totalTime - a.totalTime
+          (shortest, longest) => longest.totalTime - shortest.totalTime
         );
         break;
       case "shortest":
         sortedRecipes = [...currentDisplayedRecipes].sort(
-          (a, b) => a.totalTime - b.totalTime
+          (shortest, longest) => shortest.totalTime - longest.totalTime
         );
         break;
       default:
         if (!CuisineSelected) sortedRecipes = [...originalRecipesOrder];
+    }
+    //render the sorted recipes
+    renderRecipes(sortedRecipes);
+  });
+});
+
+//Selecting all buttons with the class
+const sortByAlphabet = document.querySelectorAll(".alphabetButton");
+
+//Sorting by alphabet.. I guess it would be best to refactor this to
+sortByAlphabet.forEach((button) => {
+  button.addEventListener("click", function () {
+    let sortedRecipes;
+
+    switch (button.value) {
+      case "A":
+        sortedRecipes = [...currentDisplayedRecipes].sort((a, b) => {
+          if (a.name > b.name) {
+            return 1;
+          } else if (a.name < b.name) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
+
+        break;
+      case "B":
+        sortedRecipes = [...currentDisplayedRecipes].sort((a, b) => {
+          if (b.name > a.name) {
+            return 1;
+          } else if (b.name < a.name) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
+
+        break;
+      default:
+        sortedRecipes = [...originalRecipesOrder];
     }
     //render the sorted recipes
     renderRecipes(sortedRecipes);
