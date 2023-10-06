@@ -8,3 +8,4 @@ Describe how you approached to problem, and what tools and techniques you used t
 Trying out different ways to access the DOM. If I had more time this week i would work on implementing a search bar and adding functions to transform the text to lowercase in case of spelling mistakes in the array,. I learned many new things about javascript.
 
 View it live:
+https://project-library-rho.vercel.app/
