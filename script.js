@@ -47,12 +47,12 @@ const recipes = [
     ],
     source: "Red Cook",
     totalTime: null,
-    URL: "http://redcook.net/2010/06/16/garlic-scape-an-off-menu-treat/",
+    url: "http://redcook.net/2010/06/16/garlic-scape-an-off-menu-treat/",
     image: "./recipe-images/vegetarian-stir-fried-garlic-s.jpg",
   },
   {
     name: "Cheat’s cheesy focaccia",
-    cuisineType: ["Italian"],
+    cuisineType: ["italian"],
     ingredients: [
       "500g pack bread mix",
       "2 tbsp olive oil , plus a little extra for drizzling",
@@ -61,7 +61,7 @@ const recipes = [
     ],
     source: "BBC Good Food",
     totalTime: 40,
-    URL: "https://www.bbcgoodfood.com/recipes/cheats-cheesy-focaccia",
+    url: "https://www.bbcgoodfood.com/recipes/cheats-cheesy-focaccia",
     image: "./recipe-images/cheat’s-cheesy-focaccia.jpg",
   },
   {
@@ -86,7 +86,7 @@ const recipes = [
     ],
     source: "Martha Stewart",
     totalTime: 120,
-    URL: "https://www.marthastewart.com/1535235/vegetarian-shepherds-pie",
+    url: "https://www.marthastewart.com/1535235/vegetarian-shepherds-pie",
     image: "./recipe-images/vegetarian-shepherd's-pie.jpg",
   },
   {
@@ -107,7 +107,7 @@ const recipes = [
     ],
     source: "No Recipes",
     totalTime: 80,
-    URL: "http://norecipes.com/recipe/chicken-paprikash/",
+    url: "http://norecipes.com/recipe/chicken-paprikash/",
     image: "./recipe-images/chicken-paprikash.jpg",
   },
   {
@@ -221,3 +221,143 @@ const recipes = [
     image: "./recipe-images/grilled.jpg",
   },
 ];
+// Populate the filter and load the recipes when the sites loads
+window.onload = function () {
+  populateCuisineFilter();
+  renderRecipes(recipes);
+};
+
+//Copy the original recipes array
+let currentDisplayedRecipes = [...recipes];
+
+//Function to load the whole recipe list , each one as a box in the recipe-container
+function renderRecipes(recipeList) {
+  const recipeContainer = document.getElementById("recipe-container");
+  //Clear the HTML before we populate the list
+  recipeContainer.innerHTML = "";
+
+  //Loop through the array and add a box for each recipe
+  recipeList.forEach((recipe) => {
+    const recipeBox = document.createElement("div");
+    recipeBox.className = "recipe-box";
+
+    //Attach the image
+    const recipeImage = document.createElement("img");
+    recipeImage.className = "recipe-img";
+    recipeImage.src = recipe.image;
+    recipeBox.appendChild(recipeImage);
+
+    //Attach the header of each recipe
+    const recipeName = document.createElement("h3");
+    recipeName.textContent = recipe.name;
+    recipeBox.appendChild(recipeName);
+
+    //Attach a smaller header for the ingridients
+    const recipeIngredientsHeader = document.createElement("h4");
+    recipeIngredientsHeader.textContent = "Ingredients:";
+    recipeBox.appendChild(recipeIngredientsHeader);
+
+    //Add the list of ingridients from the array to unordered list and then add each ing...
+    const ingredientList = document.createElement("ul");
+    recipe.ingredients.forEach((ingredient) => {
+      const ingredientItem = document.createElement("li");
+      ingredientItem.textContent = ingredient;
+      ingredientList.appendChild(ingredientItem);
+    });
+    recipeBox.appendChild(ingredientList);
+
+    //Header for cooking time
+    const recipeTimeHeader = document.createElement("h4");
+    recipeTimeHeader.textContent = "Time to prepare:";
+
+    //Adding the cooking time
+    const recipeTime = document.createElement("p");
+    recipeTime.textContent = recipe.totalTime;
+    if (recipe.totalTime != null) {
+      //if there is no value here we dont add either heading or cooking time
+      recipeBox.appendChild(recipeTimeHeader);
+      recipeBox.appendChild(recipeTime);
+    }
+    //Adding the Cuisine/origin type and header
+    const recipeOriginHeader = document.createElement("h4");
+    recipeOriginHeader.textContent = "Cuisine type:";
+
+    const recipeOrigin = document.createElement("p");
+    recipeOrigin.textContent = recipe.cuisineType;
+    if (recipe.cuisineType != null) {
+      recipeBox.appendChild(recipeOriginHeader);
+      recipeBox.appendChild(recipeOrigin);
+    }
+
+    //adding the link / source to each recipe..
+    const recipeLink = document.createElement("a");
+    recipeLink.textContent = `Source: ${recipe.source}`;
+    recipeLink.href = recipe.url;
+    recipeBox.appendChild(recipeLink);
+
+    recipeContainer.appendChild(recipeBox);
+  });
+  //Changing the current displayed recipes to the current recipe list if we need to sort them
+  currentDisplayedRecipes = recipeList;
+}
+
+//accessing the cuisine-filter dropdown list..
+const cuisineFilter = document.getElementById("cuisine-filter");
+
+//Make a new array of all the cuisine types
+function populateCuisineFilter() {
+  const AllCuisineTypes = [
+    ...new Set(recipes.flatMap((cuisine) => cuisine.cuisineType)),
+  ];
+  //Add every cuisine type as an option to choose in the dropdown
+  AllCuisineTypes.forEach((cuisine) => {
+    const option = document.createElement("option");
+    option.value = cuisine;
+    option.textContent = cuisine;
+
+    cuisineFilter.appendChild(option);
+  });
+}
+//If we change the cuisine type in the dropdown we render a new filtered list
+cuisineFilter.addEventListener("change", function () {
+  const CuisineSelected = cuisineFilter.value;
+  let filterRecipes;
+  if (CuisineSelected) {
+    filterRecipes = recipes.filter((recipe) =>
+      recipe.cuisineType.includes(CuisineSelected)
+    );
+  } else {
+    filterRecipes = recipes;
+  }
+  renderRecipes(filterRecipes);
+});
+
+//Selecting all buttons with the class
+const sortByTimeButtons = document.querySelectorAll(".timeButton");
+
+//Remember the original order by copying the array
+const originalRecipesOrder = [...currentDisplayedRecipes];
+
+//Loop through buttons and check if they are being clicked.. Then switch based on which button. Should refactor this code probably. :)
+sortByTimeButtons.forEach((button) => {
+  button.addEventListener("click", function () {
+    let sortedRecipes;
+
+    switch (button.value) {
+      case "longest":
+        sortedRecipes = [...currentDisplayedRecipes].sort(
+          (a, b) => b.totalTime - a.totalTime
+        );
+        break;
+      case "shortest":
+        sortedRecipes = [...currentDisplayedRecipes].sort(
+          (a, b) => a.totalTime - b.totalTime
+        );
+        break;
+      default:
+        if (!CuisineSelected) sortedRecipes = [...originalRecipesOrder];
+    }
+    //render the sorted recipes
+    renderRecipes(sortedRecipes);
+  });
+});
